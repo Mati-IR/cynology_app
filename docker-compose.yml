@@ -15,30 +15,18 @@ services:
       - FTP_PASS=password
     restart: always
 
-  users_db:
-    container_name: users_db
+  parking_db:
+    container_name: parking_db
     restart: always
     platform: linux/x86_64
-    build: ./database/client_db
+    build: ./database/parking_db
     volumes:
-      - ./database/client_db/db:/docker-entrypoint-initdb.d
-      - ./database/client_db/conf.d:/etc/mysql/conf.d
+      - ./database/parking_db/scripts:/docker-entrypoint-initdb.d
+      - ./database/parking_db/conf.d:/etc/mysql/conf.d
     ports:
       - "3307:3306"
     env_file:
-      - ./database/client_db/local.env
-    # pseudo terminal
-    tty: true
-
-  listings_db:
-    container_name: listings_db
-    restart: always
-    platform: linux/x86_64
-    build: ./database/listings_db
-    env_file:
-      - ./database/listings_db/local.env
-    ports:
-      - "3308:3306"
+      - ./database/parking_db/local.env
     # pseudo terminal
     tty: true
 
@@ -51,37 +39,10 @@ services:
       - PMA_ARBITRARY=1
       - PMA_HOSTS=users_db,listings_db
 
-  api_gateway:
+  backend_app:
     build: ./backend/API_gateway
     ports:
       - "8000:8000"
     depends_on:
       - users_db
 
-  identity_mvc:
-    build: ./backend/identity_microservice
-    ports:
-      - "8001:8001"
-    depends_on:
-      - users_db
-      
-  listings_mvc:
-    build: ./backend/listings_microservice
-    ports:
-      - "8002:8002"
-    depends_on:
-        - listings_db
-
-  basket_mvc:
-    build: ./backend/basket_microservice
-    ports:
-      - "8003:8003"
-    depends_on:
-      - listings_db
-
-  recommendation_mvc:
-    build: ./backend/recommendation_microservice
-    ports:
-      - "8004:8004"
-    depends_on:
-      - listings_db
