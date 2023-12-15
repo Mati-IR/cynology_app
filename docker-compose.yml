@@ -3,7 +3,7 @@ version: '3.8'
 services:
   ftp-server:
     image: fauria/vsftpd
-    container_name: my-ftp-server
+    container_name: ftp-server
     ports:
       - "20:20"
       - "21:21"
@@ -15,18 +15,18 @@ services:
       - FTP_PASS=password
     restart: always
 
-  parking_db:
-    container_name: parking_db
+  cyno_db:
+    container_name: cyno_db
     restart: always
     platform: linux/x86_64
-    build: ./database/parking_db
+    build: ./database/cyno_db
     volumes:
-      - ./database/parking_db/scripts:/docker-entrypoint-initdb.d
-      - ./database/parking_db/conf.d:/etc/mysql/conf.d
+      - ./database/cyno_db/scripts:/docker-entrypoint-initdb.d
+      - ./database/cyno_db/conf.d:/etc/mysql/conf.d
     ports:
       - "3307:3306"
     env_file:
-      - ./database/parking_db/local.env
+      - ./database/cyno_db/local.env
     # pseudo terminal
     tty: true
 
@@ -43,6 +43,4 @@ services:
     build: ./backend/API_gateway
     ports:
       - "8000:8000"
-    depends_on:
-      - users_db
 
